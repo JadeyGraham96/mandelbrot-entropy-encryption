@@ -5,6 +5,7 @@ from Crypto.Random import get_random_bytes
 from Crypto.Hash import HMAC, SHA256
 from hashlib import sha256
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Function to generate RSA key pair
 def generate_rsa_key_pair():
@@ -69,7 +70,7 @@ def load_key_from_file(filename):
         key = f.read()
     return key
 
-# Generate entropy from the Mandelbrot set
+# Generate entropy from the Mandelbrot set and plot
 def mandelbrot(c, max_iter):
     z = c
     for n in range(max_iter):
@@ -82,6 +83,7 @@ def generate_entropy_from_mandelbrot(width, height, max_iter):
     re_min, re_max = -2, 1
     im_min, im_max = -1, 1
     entropy = []
+    image = np.zeros((height, width), dtype=np.uint8)
     for y in range(height):
         for x in range(width):
             re = re_min + (x / width) * (re_max - re_min)
@@ -89,8 +91,17 @@ def generate_entropy_from_mandelbrot(width, height, max_iter):
             c = complex(re, im)
             m = mandelbrot(c, max_iter)
             entropy.append(m)
+            color = 255 - int(m * 255 / max_iter)
+            image[y, x] = color
     entropy = np.array(entropy)
     entropy_bytes = entropy.tobytes()
+    
+    # Plotting the Mandelbrot set
+    plt.imshow(image, extent=(re_min, re_max, im_min, im_max), cmap='hot')
+    plt.colorbar()
+    plt.title('Mandelbrot Set')
+    plt.show()
+    
     return sha256(entropy_bytes).digest()
 
 # Generate RSA key pairs for sender and receiver
@@ -112,8 +123,8 @@ receiver_public_key = load_key_from_file('receiver_public_key.pem')
 # Data to be encrypted
 data = b"Sensitive data that needs encryption"
 
-# Generate AES key
-aes_key = get_random_bytes(32)
+# Generate AES key using Mandelbrot entropy
+aes_key = generate_entropy_from_mandelbrot(100, 100, 1000)
 
 # Encrypt the AES key with the receiver's RSA public key
 enc_aes_key = encrypt_aes_key_with_rsa(aes_key, receiver_public_key)
