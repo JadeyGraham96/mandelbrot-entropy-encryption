@@ -21,11 +21,11 @@ This repository demonstrates the use of the Mandelbrot set to generate high-entr
     cd mandelbrot-entropy-encryption
     ```
 
-2.a Install the required packages:
+2. Install the required packages:
  ```
     pip install pycryptodome numpy matplotlib
  ```
-2.b Install the required packages:
+Or:
 ```
     pip install -r requirements.txt
 ```
